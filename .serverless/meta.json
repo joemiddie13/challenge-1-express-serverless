@@ -1,0 +1,66 @@
+{
+  "/Users/joemiddie13/Dominican/Summer-2024/Advanced-Web-Patterns/challenge-1/my-express-application": {
+    "versionSfCore": null,
+    "versionFramework": "4.1.1",
+    "isWithinCompose": false,
+    "isCompose": false,
+    "composeOrgName": null,
+    "composeServiceName": null,
+    "servicePath": "/Users/joemiddie13/Dominican/Summer-2024/Advanced-Web-Patterns/challenge-1/my-express-application",
+    "serviceConfigFileName": "serverless.yml",
+    "service": {
+      "service": "my-express-application",
+      "provider": {
+        "name": "aws",
+        "runtime": "nodejs6.10",
+        "stage": "dev",
+        "region": "us-east-1"
+      },
+      "functions": {
+        "app": {
+          "handler": "index.handler",
+          "events": [
+            {
+              "http": "ANY /"
+            },
+            {
+              "http": "ANY {proxy+}"
+            }
+          ]
+        }
+      }
+    },
+    "serviceRawFile": "service: my-express-application\n\nprovider:\n  name: aws\n  runtime: nodejs6.10\n  stage: dev\n  region: us-east-1\n\nfunctions:\n  app:\n    handler: index.handler\n    events:\n      - http: ANY /\n      - http: 'ANY {proxy+}'",
+    "command": [
+      "s"
+    ],
+    "options": {},
+    "error": {
+      "message": "AWS credentials missing or invalid. Run \"serverless\" to set up AWS credentials, or learn more in our docs: http://slss.io/aws-creds-setup. Original error from AWS: Could not load credentials from any providers",
+      "code": "AWS_CREDENTIALS_MISSING"
+    },
+    "machineId": "a3c9edeeb72909dc36f868fb94b2ef01",
+    "accessKeyV2": "<REDACTED>",
+    "accessKeyV1": "<REDACTED>",
+    "orgId": "5a45b191-0ce6-41df-9817-93f8b80b18a1",
+    "orgName": "joemiddie13",
+    "userId": "kBZ2jfx1yFdCK4pt4v",
+    "dashboard": {
+      "isEnabledForService": false,
+      "requiredAuthentication": false,
+      "orgFeaturesInUse": null,
+      "orgObservabilityIntegrations": null,
+      "serviceAppId": null,
+      "serviceProvider": null,
+      "instanceParameters": null
+    },
+    "userName": "joemiddie13",
+    "subscription": null,
+    "userEmail": "joemiddie13@gmail.com",
+    "serviceProviderAwsCfStackId": null,
+    "serviceProviderAwsCfStackCreated": null,
+    "serviceProviderAwsCfStackUpdated": null,
+    "serviceProviderAwsCfStackStatus": null,
+    "serviceProviderAwsCfStackOutputs": null
+  }
+}
