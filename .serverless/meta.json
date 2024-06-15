@@ -5,13 +5,136 @@
     "isWithinCompose": false,
     "isCompose": false,
     "composeOrgName": null,
+    "composeResolverProviders": {
+      "self": {
+        "instance": {
+          "credentials": "<REDACTED>",
+          "serviceConfigFile": {
+            "service": "my-express-application",
+            "custom": {
+              "tableName": "users-table-dev",
+              "dynamodb": {
+                "start": {
+                  "migrate": true
+                }
+              }
+            },
+            "provider": {
+              "name": "aws",
+              "runtime": "nodejs14.x",
+              "stage": "dev",
+              "region": "us-east-1",
+              "iamRoleStatements": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:Query",
+                    "dynamodb:Scan",
+                    "dynamodb:GetItem",
+                    "dynamodb:PutItem",
+                    "dynamodb:UpdateItem",
+                    "dynamodb:DeleteItem"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::GetAtt": [
+                        "UsersDynamoDBTable",
+                        "Arn"
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "environment": {
+                "USERS_TABLE": "users-table-dev"
+              },
+              "versionFunctions": true
+            },
+            "functions": {
+              "app": {
+                "handler": "index.handler",
+                "events": [
+                  {
+                    "http": "ANY /"
+                  },
+                  {
+                    "http": "ANY {proxy+}"
+                  }
+                ]
+              },
+              "getUser": {
+                "handler": "index.handler",
+                "events": [
+                  {
+                    "http": "GET /users/{proxy+}"
+                  }
+                ]
+              },
+              "createUser": {
+                "handler": "index.handler",
+                "events": [
+                  {
+                    "http": "POST /users"
+                  }
+                ]
+              }
+            },
+            "resources": {
+              "Resources": {
+                "UsersDynamoDBTable": {
+                  "Type": "AWS::DynamoDB::Table",
+                  "Properties": {
+                    "AttributeDefinitions": [
+                      {
+                        "AttributeName": "userId",
+                        "AttributeType": "S"
+                      }
+                    ],
+                    "KeySchema": [
+                      {
+                        "AttributeName": "userId",
+                        "KeyType": "HASH"
+                      }
+                    ],
+                    "ProvisionedThroughput": {
+                      "ReadCapacityUnits": 1,
+                      "WriteCapacityUnits": 1
+                    },
+                    "TableName": "users-table-dev"
+                  }
+                }
+              }
+            },
+            "plugins": [
+              "serverless-dynamodb-local",
+              "serverless-offline"
+            ]
+          },
+          "configFileDirPath": "/Users/joemiddie13/Dominican/Summer-2024/Advanced-Web-Patterns/challenge-1/my-express-application",
+          "config": {
+            "type": "self"
+          },
+          "options": {
+            "debug": "*"
+          },
+          "stage": "dev",
+          "dashboard": null
+        },
+        "resolvers": {}
+      }
+    },
     "composeServiceName": null,
     "servicePath": "/Users/joemiddie13/Dominican/Summer-2024/Advanced-Web-Patterns/challenge-1/my-express-application",
     "serviceConfigFileName": "serverless.yml",
     "service": {
       "service": "my-express-application",
       "custom": {
-        "tableName": "users-table-${self:provider.stage}"
+        "tableName": "users-table-dev",
+        "dynamodb": {
+          "start": {
+            "migrate": true
+          }
+        }
       },
       "provider": {
         "name": "aws",
@@ -40,8 +163,9 @@
           }
         ],
         "environment": {
-          "USERS_TABLE": "${self:custom.tableName}"
-        }
+          "USERS_TABLE": "users-table-dev"
+        },
+        "versionFunctions": true
       },
       "functions": {
         "app": {
@@ -52,6 +176,22 @@
             },
             {
               "http": "ANY {proxy+}"
+            }
+          ]
+        },
+        "getUser": {
+          "handler": "index.handler",
+          "events": [
+            {
+              "http": "GET /users/{proxy+}"
+            }
+          ]
+        },
+        "createUser": {
+          "handler": "index.handler",
+          "events": [
+            {
+              "http": "POST /users"
             }
           ]
         }
@@ -77,21 +217,28 @@
                 "ReadCapacityUnits": 1,
                 "WriteCapacityUnits": 1
               },
-              "TableName": "${self:custom.tableName}"
+              "TableName": "users-table-dev"
             }
           }
         }
-      }
+      },
+      "plugins": [
+        "serverless-dynamodb-local",
+        "serverless-offline"
+      ]
     },
-    "serviceRawFile": "service: my-express-application\n\ncustom:\n  tableName: 'users-table-${self:provider.stage}'\n\nprovider:\n  name: aws\n  runtime: nodejs14.x\n  stage: dev\n  region: us-east-1\n  iamRoleStatements:\n    - Effect: Allow\n      Action:\n        - dynamodb:Query\n        - dynamodb:Scan\n        - dynamodb:GetItem\n        - dynamodb:PutItem\n        - dynamodb:UpdateItem\n        - dynamodb:DeleteItem\n      Resource:\n        - { \"Fn::GetAtt\": [\"UsersDynamoDBTable\", \"Arn\" ] }\n  environment:\n    USERS_TABLE: ${self:custom.tableName}\n\nfunctions:\n  app:\n    handler: index.handler\n    events:\n      - http: ANY /\n      - http: 'ANY {proxy+}'\n\nresources:\n  Resources:\n    UsersDynamoDBTable:\n      Type: 'AWS::DynamoDB::Table'\n      Properties:\n        AttributeDefinitions:\n          - AttributeName: userId\n            AttributeType: S\n        KeySchema:\n          - AttributeName: userId\n            KeyType: HASH\n        ProvisionedThroughput:\n          ReadCapacityUnits: 1\n          WriteCapacityUnits: 1\n        TableName: ${self:custom.tableName}",
+    "serviceRawFile": "service: my-express-application\n\ncustom:\n  tableName: 'users-table-${self:provider.stage}'\n  dynamodb:\n    start:\n      migrate: true\n\nprovider:\n  name: aws\n  runtime: nodejs14.x\n  stage: dev\n  region: us-east-1\n  iamRoleStatements:\n    - Effect: Allow\n      Action:\n        - dynamodb:Query\n        - dynamodb:Scan\n        - dynamodb:GetItem\n        - dynamodb:PutItem\n        - dynamodb:UpdateItem\n        - dynamodb:DeleteItem\n      Resource:\n        - { \"Fn::GetAtt\": [\"UsersDynamoDBTable\", \"Arn\" ] }\n  environment:\n    USERS_TABLE: ${self:custom.tableName}\n\nfunctions:\n  app:\n    handler: index.handler\n    events:\n      - http: ANY /\n      - http: 'ANY {proxy+}'\n  getUser:\n    handler: index.handler\n    events:\n      - http: 'GET /users/{proxy+}'\n  createUser:\n    handler: index.handler\n    events:\n      - http: 'POST /users'\n\nresources:\n  Resources:\n    UsersDynamoDBTable:\n      Type: 'AWS::DynamoDB::Table'\n      Properties:\n        AttributeDefinitions:\n          - AttributeName: userId\n            AttributeType: S\n        KeySchema:\n          - AttributeName: userId\n            KeyType: HASH\n        ProvisionedThroughput:\n          ReadCapacityUnits: 1\n          WriteCapacityUnits: 1\n        TableName: ${self:custom.tableName}\n\nplugins:\n  - serverless-dynamodb-local\n  - serverless-offline",
     "command": [
       "deploy"
     ],
-    "options": {},
-    "error": {
-      "message": "AWS credentials missing or invalid. Run \"serverless\" to set up AWS credentials, or learn more in our docs: http://slss.io/aws-creds-setup. Original error from AWS: Could not load credentials from any providers",
-      "code": "AWS_CREDENTIALS_MISSING"
+    "options": {
+      "debug": "*"
     },
+    "error": {
+      "message": "Class extends value undefined is not a constructor or null",
+      "stack": "TypeError: Class extends value undefined is not a constructor or null\n    at new module.exports (/Users/joemiddie13/Dominican/Summer-2024/Advanced-Web-Patterns/challenge-1/my-express-application/node_modules/serverless-dynamodb-local/index.js:10:43)\n    at PluginManager.addPlugin (/Users/joemiddie13/.serverless/releases/4.1.4/serverless/lib/classes/plugin-manager.js:214:28)\n    at Plugin (/Users/joemiddie13/.serverless/releases/4.1.4/serverless/lib/classes/plugin-manager.js:271:33)\n    at Array.forEach (<anonymous>)\n    at PluginManager.loadAllPlugins (/Users/joemiddie13/.serverless/releases/4.1.4/serverless/lib/classes/plugin-manager.js:271:8)\n    at Serverless.init (/Users/joemiddie13/.serverless/releases/4.1.4/serverless/lib/serverless.js:149:5)\n    at runFramework (/Users/joemiddie13/.serverless/releases/4.1.4/sf-core/src/lib/runners/framework.js:168:5)\n    at route (/Users/joemiddie13/.serverless/releases/4.1.4/sf-core/src/lib/router.js:197:10)\n    at Object.run2 (/Users/joemiddie13/.serverless/releases/4.1.4/sf-core/src/index.js:45:3)\n    at run3 (/Users/joemiddie13/.serverless/releases/4.1.4/sf-core/bin/sf-core.js:30:3)"
+    },
+    "params": {},
     "machineId": "d1539f23ba18457ba543b8a14b729a7a",
     "accessKeyV2": "<REDACTED>",
     "accessKeyV1": "<REDACTED>",
@@ -110,10 +257,18 @@
     "userName": "joemiddie13",
     "subscription": null,
     "userEmail": "joemiddie13@gmail.com",
-    "serviceProviderAwsCfStackId": null,
-    "serviceProviderAwsCfStackCreated": null,
-    "serviceProviderAwsCfStackUpdated": null,
-    "serviceProviderAwsCfStackStatus": null,
-    "serviceProviderAwsCfStackOutputs": null
+    "serviceProviderAwsCredentials": "<REDACTED>",
+    "serviceProviderAwsAccountId": "891377391746",
+    "versionSf": "4.1.4",
+    "serviceProviderAwsCfStackId": "arn:aws:cloudformation:us-east-1:891377391746:stack/my-express-application-dev/aa18ac90-2b70-11ef-b7b8-0affcb30fe4f",
+    "serviceProviderAwsCfStackCreated": "2024-06-15T23:40:36.282Z",
+    "serviceProviderAwsCfStackUpdated": "2024-06-15T23:41:44.523Z",
+    "serviceProviderAwsCfStackStatus": "UPDATE_ROLLBACK_COMPLETE",
+    "serviceProviderAwsCfStackOutputs": [
+      {
+        "OutputKey": "ServerlessDeploymentBucketName",
+        "OutputValue": "my-express-application-de-serverlessdeploymentbuck-p6qtkpzc6cp0"
+      }
+    ]
   }
 }
