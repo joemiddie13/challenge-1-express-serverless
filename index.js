@@ -19,8 +19,6 @@ if (IS_OFFLINE === 'true') {
 
 app.use(bodyParser.json({ strict: false }));
 
-// ... rest of the application code ...
-
 app.get('/', function (req, res) {
   res.send('Hello World!');
 });
