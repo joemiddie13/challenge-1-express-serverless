@@ -1,7 +1,7 @@
 {
   "/Users/joemiddie13/Dominican/Summer-2024/Advanced-Web-Patterns/challenge-1/my-express-application": {
     "versionSfCore": null,
-    "versionFramework": "4.1.1",
+    "versionFramework": "4.1.4",
     "isWithinCompose": false,
     "isCompose": false,
     "composeOrgName": null,
@@ -10,11 +10,38 @@
     "serviceConfigFileName": "serverless.yml",
     "service": {
       "service": "my-express-application",
+      "custom": {
+        "tableName": "users-table-${self:provider.stage}"
+      },
       "provider": {
         "name": "aws",
-        "runtime": "nodejs6.10",
+        "runtime": "nodejs14.x",
         "stage": "dev",
-        "region": "us-east-1"
+        "region": "us-east-1",
+        "iamRoleStatements": [
+          {
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:Query",
+              "dynamodb:Scan",
+              "dynamodb:GetItem",
+              "dynamodb:PutItem",
+              "dynamodb:UpdateItem",
+              "dynamodb:DeleteItem"
+            ],
+            "Resource": [
+              {
+                "Fn::GetAtt": [
+                  "UsersDynamoDBTable",
+                  "Arn"
+                ]
+              }
+            ]
+          }
+        ],
+        "environment": {
+          "USERS_TABLE": "${self:custom.tableName}"
+        }
       },
       "functions": {
         "app": {
@@ -28,18 +55,44 @@
             }
           ]
         }
+      },
+      "resources": {
+        "Resources": {
+          "UsersDynamoDBTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "userId",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "userId",
+                  "KeyType": "HASH"
+                }
+              ],
+              "ProvisionedThroughput": {
+                "ReadCapacityUnits": 1,
+                "WriteCapacityUnits": 1
+              },
+              "TableName": "${self:custom.tableName}"
+            }
+          }
+        }
       }
     },
-    "serviceRawFile": "service: my-express-application\n\nprovider:\n  name: aws\n  runtime: nodejs6.10\n  stage: dev\n  region: us-east-1\n\nfunctions:\n  app:\n    handler: index.handler\n    events:\n      - http: ANY /\n      - http: 'ANY {proxy+}'",
+    "serviceRawFile": "service: my-express-application\n\ncustom:\n  tableName: 'users-table-${self:provider.stage}'\n\nprovider:\n  name: aws\n  runtime: nodejs14.x\n  stage: dev\n  region: us-east-1\n  iamRoleStatements:\n    - Effect: Allow\n      Action:\n        - dynamodb:Query\n        - dynamodb:Scan\n        - dynamodb:GetItem\n        - dynamodb:PutItem\n        - dynamodb:UpdateItem\n        - dynamodb:DeleteItem\n      Resource:\n        - { \"Fn::GetAtt\": [\"UsersDynamoDBTable\", \"Arn\" ] }\n  environment:\n    USERS_TABLE: ${self:custom.tableName}\n\nfunctions:\n  app:\n    handler: index.handler\n    events:\n      - http: ANY /\n      - http: 'ANY {proxy+}'\n\nresources:\n  Resources:\n    UsersDynamoDBTable:\n      Type: 'AWS::DynamoDB::Table'\n      Properties:\n        AttributeDefinitions:\n          - AttributeName: userId\n            AttributeType: S\n        KeySchema:\n          - AttributeName: userId\n            KeyType: HASH\n        ProvisionedThroughput:\n          ReadCapacityUnits: 1\n          WriteCapacityUnits: 1\n        TableName: ${self:custom.tableName}",
     "command": [
-      "s"
+      "deploy"
     ],
     "options": {},
     "error": {
       "message": "AWS credentials missing or invalid. Run \"serverless\" to set up AWS credentials, or learn more in our docs: http://slss.io/aws-creds-setup. Original error from AWS: Could not load credentials from any providers",
       "code": "AWS_CREDENTIALS_MISSING"
     },
-    "machineId": "a3c9edeeb72909dc36f868fb94b2ef01",
+    "machineId": "d1539f23ba18457ba543b8a14b729a7a",
     "accessKeyV2": "<REDACTED>",
     "accessKeyV1": "<REDACTED>",
     "orgId": "5a45b191-0ce6-41df-9817-93f8b80b18a1",
