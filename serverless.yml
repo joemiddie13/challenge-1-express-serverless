@@ -54,4 +54,11 @@ resources:
         TableName: ${self:custom.tableName}
 
 plugins:
+  - serverless-dynamodb-local
   - serverless-offline
+
+custom:
+  tableName: 'users-table-${self:provider.stage}'
+  dynamodb:
+    start:
+      migrate: true
